@@ -1,21 +1,41 @@
-import { useAlert } from '@/src/shared/hooks/useAlert'
-import React from 'react'
+import { LoadingComponent } from '@/src/shared/components/StatusComponents'
+import React, { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Button, HelperText, TextInput } from 'react-native-paper'
+import { Button, Checkbox, HelperText, List, TextInput } from 'react-native-paper'
+import { useCategorias } from '../../categorias/hooks/useCategorias'
 import { useProductoEditarForm } from '../hooks/useForms'
 
 
 export const ProductoEditarForm = ({ id }: { id: number }) => {
-  const { showAlert } = useAlert()
   const {
     handleChange,
     handleBlur,
     handleSubmit,
+    setFieldValue,
+    cargandoProducto,
+    enProceso,
     values,
     errors,
     touched,
     isSubmitting,
   } = useProductoEditarForm(id)
+
+  const [pagina, setPagina] = useState(1)
+  const [limite, setLimite] = useState(50)
+  const { categorias, cargando: cargandoCat, error } = useCategorias(pagina, limite)
+
+  const toggleSeleccion = (id: number) => {
+    setFieldValue(
+      'categorias',
+      values.categorias.includes(id)
+        ? values.categorias.filter((catId) => catId !== id)
+        : [...values.categorias, id]
+    )
+  }
+
+  if (cargandoProducto || cargandoCat || categorias === undefined) {
+    return (<LoadingComponent></LoadingComponent>)
+  }
 
   return (
     <View style={styles.container}>
@@ -70,6 +90,27 @@ export const ProductoEditarForm = ({ id }: { id: number }) => {
         {errors.precio_mayorista}
       </HelperText>
 
+
+      <List.Section title="Selecciona las categorías">
+        {categorias.data.map((categoria) => (
+          <List.Item
+            key={categoria.id}
+            title={categoria.nombre}
+            left={() => (
+              <Checkbox
+                status={values.categorias.includes(categoria.id) ? 'checked' : 'unchecked'}
+                onPress={() => toggleSeleccion(categoria.id)}
+              />
+            )}
+            onPress={() => toggleSeleccion(categoria.id)}
+          />
+        ))}
+      </List.Section>
+      <HelperText type="error" visible={!!errors.categorias && touched.categorias}>
+        {errors.categorias}
+      </HelperText>
+
+
       <Button
         mode="contained"
         onPress={async () => {
@@ -81,7 +122,7 @@ export const ProductoEditarForm = ({ id }: { id: number }) => {
         disabled={isSubmitting}
         style={styles.button}
       >
-        {isSubmitting ? 'Creando...' : 'Crear Producto'}
+        {isSubmitting ? 'Editando...' : 'Editar Producto'}
       </Button>
     </View>
   )
@@ -90,7 +131,6 @@ export const ProductoEditarForm = ({ id }: { id: number }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    gap: 2,
   },
   button: {
     marginTop: 16,

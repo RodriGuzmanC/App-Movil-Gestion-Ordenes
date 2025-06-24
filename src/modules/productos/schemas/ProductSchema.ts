@@ -16,6 +16,17 @@ export const productoSchema = yup.object().shape({
     .positive('Debe ser mayor que cero')
     .required('El precio mayorista es obligatorio'),
   //stock: yup.number().min(0, 'Debe ser mayor o igual a 0').required('El stock es obligatorio')
+  categorias: yup
+    .array()
+    .of(
+      yup
+        .number()
+        .typeError('Cada categoría debe ser un ID numérico')
+        .integer('El ID de la categoría debe ser un número entero')
+        .positive('El ID de la categoría debe ser positivo')
+    )
+    .min(1, 'Debe seleccionar al menos una categoría')
+    .required('Debe seleccionar al menos una categoría'),
 });
 
 export type ProductoFormData = yup.InferType<typeof productoSchema>

@@ -1,11 +1,9 @@
-import { useAlert } from '@/src/shared/hooks/useAlert'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Button, HelperText, TextInput } from 'react-native-paper'
 import { useProductoCrearForm } from '../hooks/useForms'
 
 export const ProductoCrearForm = () => {
-  const { showAlert } = useAlert()
   const {
     handleChange,
     handleBlur,

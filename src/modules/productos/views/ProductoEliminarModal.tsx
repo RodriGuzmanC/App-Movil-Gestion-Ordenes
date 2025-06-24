@@ -1,52 +1,74 @@
 // components/ProductoEliminarModal.tsx
 import React from 'react'
-import { Button, Modal, StyleSheet, Text, View } from 'react-native'
-import { useEliminarProducto } from '../hooks/useProductos'
+import { StyleSheet, View } from 'react-native'
+import { ActivityIndicator, Button, Modal, Portal, Text } from 'react-native-paper'
+import { useProductoEliminarForm } from '../hooks/useForms'
 
-export const ProductoEliminarModal = ({ id, visible, onClose }: { id: number | string, visible: boolean, onClose: () => void }) => {
-    const { ejecutarEliminar, enProceso, error } = useEliminarProducto(id)
 
-    const handleDelete = async () => {
-        await ejecutarEliminar()
-        onClose()
-    }
+export const ProductoEliminarModal = (
+  { id, visible, onClose }: { id: number | string, visible: boolean, onClose: () => void }
+) => {
+  const { handleDelete: ejecutarEliminar, enProceso, error } = useProductoEliminarForm(id)
 
-    return (
-        <Modal visible={visible} transparent animationType="slide">
-            <View style={styles.overlay}>
-                <View style={styles.modal}>
-                    <Text>¿Estás seguro que deseas eliminar este producto?</Text>
-                    {error && <Text style={styles.error}>{error}</Text>}
-                    <View style={styles.actions}>
-                        <Button title="Cancelar" onPress={onClose} />
-                        <Button title={enProceso ? 'Eliminando...' : 'Eliminar'} onPress={handleDelete} color="red" />
-                    </View>
-                </View>
-            </View>
-        </Modal>
-    )
+  const handleDelete = async () => {
+    await ejecutarEliminar()
+    onClose()
+  }
+
+  return (
+    <Portal>
+      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modal}>
+        <Text variant="titleMedium" style={styles.title}>
+          ¿Estás seguro que deseas eliminar este producto?
+        </Text>
+        <Text variant="bodyMedium">ID: {id}</Text>
+        
+        {error && <Text style={styles.error}>{error}</Text>}
+
+        <View style={styles.actions}>
+          <Button mode="outlined" onPress={onClose} style={styles.button}>
+            Cancelar
+          </Button>
+          <Button
+            mode="contained"
+            onPress={handleDelete}
+            buttonColor="red"
+            textColor="white"
+            disabled={enProceso}
+            style={styles.button}
+          >
+            {enProceso ? 'Eliminando...' : 'Eliminar'}
+          </Button>
+        </View>
+
+        {enProceso && <ActivityIndicator style={{ marginTop: 10 }} />}
+      </Modal>
+    </Portal>
+  )
 }
 
 const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-    },
-    modal: {
-        backgroundColor: '#fff',
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
-    },
-    actions: {
-        marginTop: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    error: {
-        color: 'red',
-        marginTop: 10,
-    },
+  modal: {
+    backgroundColor: 'white',
+    padding: 20,
+    marginHorizontal: 20,
+    borderRadius: 8,
+  },
+  title: {
+    marginBottom: 10,
+    fontWeight: 'bold',
+  },
+  error: {
+    color: 'red',
+    marginVertical: 8,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: 20,
+  },
+  button: {
+    minWidth: 100,
+  },
 })
