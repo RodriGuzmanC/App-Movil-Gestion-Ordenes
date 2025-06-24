@@ -1,21 +1,21 @@
-import { ProductoListar } from '@/src/modules/productos/views/ProductoListar';
 import { useRouter } from 'expo-router';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Button } from 'react-native-paper';
 
 
 export default function HomeScreen() {
-    const router = useRouter()
-  
+  const router = useRouter()
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido a la App</Text>
-      <Text style={styles.subtitle}>Esta es la pantalla de inicio.</Text>
-      <Button title='Crear' onPress={() => {
-        router.navigate({
-          pathname: '/productos/create',
-        })
-      }}></Button>
-      <ProductoListar></ProductoListar>
+      <Button mode='contained' icon={'plus'}>Boton rapido 1</Button>
+      <Button mode='contained' icon={'plus'}>Boton rapido 2</Button>
+
+      <Button mode='contained' icon={'plus'}>Boton rapido 3</Button>
+
+      <Button mode='contained' icon={'plus'}>Boton rapido 4</Button>
+
+
     </View>
   );
 }
@@ -25,16 +25,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 24,
-    paddingHorizontal: 16,
+    paddingHorizontal: 2,
+    gap: 12,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 16,
-  },
+
 });
