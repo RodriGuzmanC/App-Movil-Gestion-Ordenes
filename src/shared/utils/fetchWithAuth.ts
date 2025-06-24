@@ -1,7 +1,7 @@
 // src/shared/utils/fetchWithAuth.ts
 
-//const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-const API_BASE_URL = "https://sistema-gestion-de-inventario.vercel.app/api/";
+const API_BASE_URL = process.env.EXPO_PUBLIC_DEV_API_URL;
+//const API_BASE_URL = "https://sistema-gestion-de-inventario.vercel.app/api/";
 
 export interface FetchOptions extends RequestInit {
   token?: string; // opcional si ya tienes el token en otro lado

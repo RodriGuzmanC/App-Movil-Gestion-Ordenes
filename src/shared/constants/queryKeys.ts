@@ -2,7 +2,7 @@ const queryKeys = {
     productos: (pagina: number = 1, limite: number = 10) => ['productos', pagina, limite],
     productoById: (id: number | string) => `productos-${id}`,
 
-    categorias: 'categorias',
+    categorias: (pagina: number = 1, limite: number = 10) => ['categorias', pagina, limite],
     categoriaById: (id: number | string) => `categorias-${id}`,
 
     ventas: 'ventas',

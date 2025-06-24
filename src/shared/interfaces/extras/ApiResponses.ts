@@ -1,11 +1,8 @@
+import { Paginacion } from "./PaginatedType";
+
 export interface PaginatedResponse<T> {
     data: T[];
-    paginacion: {
-        pagina_actual: number;
-        total_items: number;
-        items_por_pagina: number;
-        total_paginas: number;
-    };
+    paginacion: Paginacion
     error?: string | null;  // De nuevo, para manejar posibles errores
 };
 

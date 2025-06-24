@@ -2,24 +2,20 @@
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import { ActivityIndicator, Button, Text } from 'react-native-paper'
+import { useCatchErrors } from '../hooks/useCatchErorrs'
+import { Paginacion } from '../interfaces/extras/PaginatedType'
 
-type Paginacion = {
-  pagina_actual: number
-  total_items: number
-  items_por_pagina: number
-  total_paginas: number
-}
 
 type BotonCargarMasProps = {
   paginacion: Paginacion
   cargando: boolean
-  onCargarMas: () => void
+  setPagina: React.Dispatch<React.SetStateAction<number>>
 }
 
 export const LoadMore: React.FC<BotonCargarMasProps> = ({
   paginacion,
   cargando,
-  onCargarMas,
+  setPagina,
 }) => {
   const hayMasPaginas = paginacion.pagina_actual < paginacion.total_paginas
 
@@ -29,6 +25,19 @@ export const LoadMore: React.FC<BotonCargarMasProps> = ({
         <Text>No hay más productos para mostrar.</Text>
       </View>
     )
+  }
+  
+  const { catchErrors } = useCatchErrors()
+
+  const onCargarMas = () => {
+    catchErrors(async () => {
+      if (!paginacion || cargando) {
+        throw new Error("No se puede cargar más productos en este momento.")
+      }
+      if (paginacion.pagina_actual < paginacion.total_paginas) {
+        setPagina((prev) => prev + 1)
+      }
+    })
   }
 
   return (
