@@ -64,18 +64,25 @@ export default function ClienteListScreen() {
         <>
             <ClienteCrearModal onClose={() => setModalCreateVisible(false)} visible={modalCreateVisible}></ClienteCrearModal>
             <Button mode='contained' onPress={() => setModalCreateVisible(true)}>Crear cliente</Button>
-            {clienteIndividual && (
+            
+            {clienteIndividual && modalEditVisible && (
+                <>
+                    <ClienteEditarModal
+                        id={clienteIndividual?.id}
+                        nombre={clienteIndividual.nombre}
+                        onClose={() => setModalEditVisible(false)}
+                        visible={modalEditVisible}></ClienteEditarModal>
+                </>
+            )
+            }
+
+            {clienteIndividual && modalDeleteVisible && (
                 <>
                     <ClienteEliminarModal
                         id={clienteIndividual?.id}
                         nombre={clienteIndividual.nombre}
                         onClose={() => setModalDeleteVisible(false)}
                         visible={modalDeleteVisible}></ClienteEliminarModal>
-                    <ClienteEditarModal
-                        id={clienteIndividual?.id}
-                        nombre={clienteIndividual.nombre}
-                        onClose={() => setModalEditVisible(false)}
-                        visible={modalEditVisible}></ClienteEditarModal>
                 </>
             )
             }
