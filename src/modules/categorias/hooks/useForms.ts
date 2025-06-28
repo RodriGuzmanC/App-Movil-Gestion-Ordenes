@@ -1,12 +1,13 @@
 import queryKeys from '@/src/shared/constants/queryKeys'
 import { useCatchErrors } from '@/src/shared/hooks/useCatchErorrs'
+import { Category } from '@/src/shared/interfaces/CategoryModel'
 import { AlertService } from '@/src/shared/utils/AlertService'
 import { useRouter } from 'expo-router'
 import { useFormik } from 'formik'
 import { useEffect } from 'react'
 import { mutate } from 'swr'
 import { CategoriaFormData, categoriaSchema } from '../schemas/CategoriaSchema'
-import { useCategoriaById, useCrearCategoria, useEditarCategoria, useEliminarCategoria } from './useCategorias'
+import { useCrearCategoria, useEditarCategoria, useEliminarCategoria } from './useCategorias'
 
 export const useCategoriaCrearForm = () => {
   const { catchErrors } = useCatchErrors()
@@ -33,7 +34,7 @@ export const useCategoriaCrearForm = () => {
         resetForm()
         AlertService.show('Categoría creada exitosamente', 'success')
         mutate(queryKeys.categorias)
-        router.navigate('/(tabs)')
+        router.navigate('/categorias')
       })
     },
   })
@@ -47,7 +48,7 @@ export const useCategoriaCrearForm = () => {
 }
 
 
-export const useCategoriaEditarForm = (id: number) => {
+export const useCategoriaEditarForm = (id: number, categoriaObj: Category) => {
   const { catchErrors } = useCatchErrors()
   const router = useRouter()
 
@@ -57,12 +58,6 @@ export const useCategoriaEditarForm = (id: number) => {
     enProceso,
     error,
   } = useEditarCategoria(id)
-
-  const {
-    categoriaById,
-    cargando: cargandoCategoria,
-    error: errorObtenerCategoria,
-  } = useCategoriaById(id)
 
   const formik = useFormik<CategoriaFormData>({
     initialValues: {
@@ -79,23 +74,22 @@ export const useCategoriaEditarForm = (id: number) => {
         resetForm()
         AlertService.show('Categoría editada exitosamente', 'success')
         mutate(queryKeys.categorias)
-        router.navigate('/(tabs)')
+        router.navigate('/categorias')
       })
     },
   })
 
   useEffect(() => {
-    if (categoriaById) {
+    if (categoriaObj) {
       formik.setValues({
-        nombre: categoriaById.data.nombre || '',
-        descripcion: categoriaById.data.descripcion || '',
+        nombre: categoriaObj.nombre || '',
+        descripcion: categoriaObj.descripcion || '',
       })
     }
-  }, [categoriaById])
+  }, [categoriaObj])
 
   return {
     ...formik,
-    cargandoCategoria,
     enProceso,
     error,
     categoria,
@@ -121,7 +115,7 @@ export const useCategoriaEliminarForm = (id: string | number) => {
 
       AlertService.show('Categoría eliminada exitosamente', 'success')
       mutate(queryKeys.categorias)
-      router.navigate('/(tabs)')
+      router.navigate('/categorias')
     })
   }
 
