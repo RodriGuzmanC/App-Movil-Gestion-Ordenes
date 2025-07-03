@@ -93,6 +93,7 @@ export const ProductoListar = () => {
 
                 <View style={styles.actions}>
                   <Button onPress={() => handleEditar(item.id)}>Editar</Button>
+                  <Button onPress={() => handleVerDetalle(item.id)}>Ver</Button>
                   <Button onPress={() => handleEliminar(item.id)} textColor="red">Eliminar</Button>
                 </View>
               </View>
@@ -160,6 +161,6 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 6,
   },
 });
