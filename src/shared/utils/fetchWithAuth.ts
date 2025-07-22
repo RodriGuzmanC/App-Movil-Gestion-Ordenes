@@ -1,10 +1,8 @@
-// src/shared/utils/fetchWithAuth.ts
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_DEV_API_URL;
-//const API_BASE_URL = "https://sistema-gestion-de-inventario.vercel.app/api/";
 
 export interface FetchOptions extends RequestInit {
-  token?: string; // opcional si ya tienes el token en otro lado
+  token?: string;
 }
 
 export const fetchWithAuth = async (
@@ -12,8 +10,7 @@ export const fetchWithAuth = async (
   options: FetchOptions = {}
 ): Promise<any> => {
   try {
-    const token = options.token || ''; // puedes reemplazar con lectura de AsyncStorage si lo deseas
-
+    const token = options.token || ''; 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers: {
@@ -23,14 +20,20 @@ export const fetchWithAuth = async (
       },
     });
 
+    
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({})); // en caso el error no tenga cuerpo
       throw new Error(errorData.message || 'Error al realizar la petición');
     }
 
+    if (response.status === 204) {
+      return { success: true }; // o lo que desees retornar como confirmación
+    }
+    
+
     return await response.json();
   } catch (error: any) {
-    console.error(`[fetchWithAuth] ${error.message}`);
+    console.error(`[fetchWithAuth] ${error.message}`, error);
     throw error;
   }
 };

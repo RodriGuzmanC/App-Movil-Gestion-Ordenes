@@ -16,7 +16,7 @@ export interface Product {
 }
 
 export interface ProductWithFullRelations extends Product {
-  estados_productos: ProductStatus[];
+  estados_productos: ProductStatus;
   galerias: Gallery[]
   variaciones: VariationWithRelations[]
   categorias_productos: CategoryProductWithRelations[]

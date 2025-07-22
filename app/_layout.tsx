@@ -57,6 +57,16 @@ export default function RootLayout() {
                 ),
               }}
             />
+            <Tabs.Screen
+              name="clientes"
+              options={{
+                title: "Clientes",
+                headerShown: false,
+                tabBarIcon: ({ color }) => (
+                  <MaterialCommunityIcons name="cog" color={color} size={26} />
+                ),
+              }}
+            />
           </Tabs>
         </AlertProvider>
       </PaperProvider>
