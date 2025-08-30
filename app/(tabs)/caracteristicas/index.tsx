@@ -2,7 +2,7 @@ import TiposAtributosListScreen from '@/src/modules/caracteristicas/views/Caract
 import React from 'react'
 import { View } from 'react-native'
 
-export default function index() {
+export default function CaracteristicasHome() {
   return (
     <View>
         <TiposAtributosListScreen></TiposAtributosListScreen>

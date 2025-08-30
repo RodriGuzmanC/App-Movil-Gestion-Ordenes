@@ -1,17 +1,16 @@
 import OrderDetailCreateScreen from '@/src/modules/pedidos/detalle/views/OrdenDetalleCrear';
 import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 export default function crearDetallePedido() {
     const { orden } = useLocalSearchParams<{
-        orden: string
+        orden: string,
+
     }>();
     return (
-        <View>
-            <Text>Crear detalle</Text>
-            <Text>{orden}</Text>
-            <OrderDetailCreateScreen orderId={parseInt(orden)} ></OrderDetailCreateScreen>
+        <View style={{ flex: 1 }}>
+            <OrderDetailCreateScreen orderId={parseInt(orden)} tipoOrden='entrada' ></OrderDetailCreateScreen>
         </View>
     )
 }

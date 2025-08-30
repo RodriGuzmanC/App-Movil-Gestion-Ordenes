@@ -1,22 +1,38 @@
-import { useFonts } from 'expo-font';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
+import { Colors } from '@/constants/Colors';
 import { AlertProvider } from '@/src/shared/components/AlertContext';
-//import { PaperProvider } from 'react-native-paper';
-
-import { CustomdDarkTheme, CustomLightTheme } from '@/src/shared/constants/colors';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Tabs } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { DarkTheme as NavigationDarkTheme, DefaultTheme as NavigationDefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { merge } from 'lodash';
+import { StyleSheet, useColorScheme } from 'react-native';
 import {
+  adaptNavigationTheme,
+  MD3DarkTheme,
   Provider as PaperProvider
 } from 'react-native-paper';
+import 'react-native-reanimated';
+
+
+const CustomdDarkTheme = { ...MD3DarkTheme, colors: Colors.dark}
+const CustomLightTheme = { ...MD3DarkTheme, colors: Colors.light}
+
+const { LightTheme, DarkTheme } = adaptNavigationTheme({
+  reactNavigationLight: NavigationDefaultTheme,
+  reactNavigationDark: NavigationDarkTheme,
+});
+
+const CombinedDefaultTheme = merge(LightTheme, CustomLightTheme);
+const CombinedDarkTheme = merge(DarkTheme, CustomdDarkTheme);
 
 export default function RootLayout() {
-  //const colorScheme = useColorScheme();
-  const colorScheme = 'light'; // Force light theme for testing purposes
+  const colorScheme = useColorScheme();
+
+  const paperTheme = 
+  colorScheme === 'dark' 
+  ? CombinedDefaultTheme
+  : CombinedDefaultTheme ;
+  
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -26,51 +42,25 @@ export default function RootLayout() {
     return null;
   }
 
-  const paperTheme = colorScheme === 'dark' ? CustomdDarkTheme : CustomLightTheme;
-  const Tab = createBottomTabNavigator();
-
   return (
-    <View style={styles.container}>
 
-      <PaperProvider theme={paperTheme}>
-        <AlertProvider>
-          <StatusBar style="auto" />
-          
-          <Tabs>
-            <Tabs.Screen
-              name="(tabs)"
-              options={{
-                title: "Inicio",
-                headerShown: false,
-                tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name="home" color={color} size={26} />
-                ),
-              }}
-            />
-            <Tabs.Screen
-              name="productos"
-              options={{
-                title: "Productos",
-                headerShown: false,
-                tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name="cog" color={color} size={26} />
-                ),
-              }}
-            />
-            <Tabs.Screen
-              name="clientes"
-              options={{
-                title: "Clientes",
-                headerShown: false,
-                tabBarIcon: ({ color }) => (
-                  <MaterialCommunityIcons name="cog" color={color} size={26} />
-                ),
-              }}
-            />
-          </Tabs>
-        </AlertProvider>
-      </PaperProvider>
-    </View>
+
+        <PaperProvider theme={paperTheme}>
+          <ThemeProvider value={paperTheme}>
+          <AlertProvider>
+            <StatusBar style='auto' />
+              <Stack>
+              <Stack.Screen
+                name="(tabs)"
+                options={{
+                  headerShown: false,
+                }} />
+            </Stack>
+
+          </AlertProvider>
+          </ThemeProvider>
+        </PaperProvider>
+
   );
 }
 
@@ -79,6 +69,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 24,
     paddingHorizontal: 2,
+    paddingBottom: 24,
   },
 
 });

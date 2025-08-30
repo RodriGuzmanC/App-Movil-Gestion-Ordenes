@@ -1,11 +1,10 @@
 import { ProductoCrearForm } from '@/src/modules/productos/views/ProductoCrearForm'
 import React from 'react'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 
 export default function CreateTab() {
   return (
-    <View style={{ backgroundColor: 'white', flex: 1 }}>
-      <Text>Crear Producto</Text>
+    <View >
       <ProductoCrearForm></ProductoCrearForm>
     </View>
   )

@@ -1,21 +1,40 @@
-import { useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
-import { Button } from 'react-native-paper';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { IconButton, Surface, Text, useTheme } from 'react-native-paper';
 
+const acciones = [
+  { id: '1', titulo: 'Nueva venta', icono: 'cart-plus' },
+  { id: '2', titulo: 'Agregar cliente', icono: 'account-plus' },
+  { id: '3', titulo: 'Registrar pago', icono: 'cash-plus' },
+  { id: '4', titulo: 'Inventario', icono: 'clipboard-list' },
+];
 
 export default function HomeScreen() {
-  const router = useRouter()
+  const theme = useTheme();
+
+  const renderItem = ({ item }: any) => (
+    <Surface style={styles.card} elevation={3}>
+      <IconButton
+        icon={item.icono}
+        size={32}
+        iconColor={theme.colors.primary}
+        onPress={() => console.log(`Acción: ${item.titulo}`)}
+      />
+      <Text variant="labelMedium" style={styles.cardText}>
+        {item.titulo}
+      </Text>
+    </Surface>
+  );
 
   return (
     <View style={styles.container}>
-      <Button mode='contained' icon={'plus'}>Boton rapido 1</Button>
-      <Button mode='contained' icon={'plus'}>Boton rapido 2</Button>
-
-      <Button mode='contained' icon={'plus'}>Boton rapido 3</Button>
-
-      <Button mode='contained' icon={'plus'}>Boton rapido 4</Button>
-
-
+      <FlatList
+        data={acciones}
+        numColumns={2}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.grid}
+        columnWrapperStyle={styles.row}
+      />
     </View>
   );
 }
@@ -23,10 +42,28 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     paddingTop: 24,
-    paddingHorizontal: 2,
-    gap: 12,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-
+  grid: {
+    paddingHorizontal: 12,
+    paddingBottom: 24,
+  },
+  row: {
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  card: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginHorizontal: 8,
+    borderRadius: 12,
+  },
+  cardText: {
+    marginTop: 8,
+    textAlign: 'center',
+  },
 });

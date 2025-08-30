@@ -8,7 +8,7 @@ export default function VerDetalle() {
   const parsedId = Array.isArray(id) ? id[0] : id;
 
   return (
-    <View style={{ backgroundColor: 'white', flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <ProductoDetalle id={parsedId}></ProductoDetalle>
     </View>
   )
