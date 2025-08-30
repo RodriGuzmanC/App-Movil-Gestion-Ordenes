@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import { ActivityIndicator, Button, Modal, Portal, Text } from 'react-native-paper'
+import { ActivityIndicator, Button, Modal, Portal, Text, useTheme } from 'react-native-paper'
 import { useAtributoVariacionEliminarForm } from '../hooks/useForms'
 
 interface Props {
@@ -29,9 +29,11 @@ export const AtributoVariacionEliminarModal = ({
     onClose()
   }
 
+  const theme = useTheme()
+
   return (
     <Portal>
-      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modal}>
+      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={[styles.modal, {  backgroundColor: theme.colors.background }]}>
         <Text variant="titleMedium" style={styles.title}>
           ¿Estás seguro que deseas eliminar este elemento?
         </Text>
@@ -63,7 +65,6 @@ export const AtributoVariacionEliminarModal = ({
 
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: 'white',
     padding: 20,
     marginHorizontal: 20,
     borderRadius: 8,

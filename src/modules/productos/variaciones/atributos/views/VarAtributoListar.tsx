@@ -3,8 +3,7 @@ import { VariationAttributeWithRelations } from '@/src/shared/interfaces/Variati
 import { VariationWithRelations } from '@/src/shared/interfaces/VariationModel'
 import React, { useState } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
-import { Button, Modal, Portal, Text } from 'react-native-paper'
-import { Dropdown } from 'react-native-paper-dropdown'
+import { Button, Chip, Modal, Portal, Text, useTheme } from 'react-native-paper'
 import { AtributoVariacionCrearModal } from './VarAtributoCrearModal'
 import { AtributoVariacionEditarModal } from './VarAtributoEditModal'
 import { AtributoVariacionEliminarModal } from './VarAtributoEliminarModal'
@@ -55,9 +54,11 @@ export const ListaAtributosVariacion = ({ variacion, visible, onClose }: Props) 
         setOpenModalEliminar(true)
     }
 
+    const theme = useTheme()
+
     return (
         <Portal>
-            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modal}>
+            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.background }]}>
 
                 {openModalEliminar && variaAtributoSeleccionado && (
                     <AtributoVariacionEliminarModal
@@ -93,45 +94,56 @@ export const ListaAtributosVariacion = ({ variacion, visible, onClose }: Props) 
                 <FlatList
                     data={variacion.variaciones_atributos}
                     keyExtractor={item => item.id.toString()}
-                    renderItem={({ item, index }) => {
-                        const tipoSeleccionado = selectedTypes[index] ?? item.atributos.tipo_atributo_id.toString()
-                        const atributoSeleccionado = selectedAttributes[index] ?? item.atributos.id.toString()
+                    style={styles.list}
+                    ListHeaderComponent={() => (
+                        <View>
+                            <Text variant="titleMedium" style={styles.headerTitle}>
+                                Atributos de la Variación N° {variacion.id}
+                            </Text>
+                        </View>
+                    )}
+                    renderItem={({ item }) => (
+                        <View style={styles.itemContainer}>
+                            <View style={styles.itemChipContainer} >
+                                <View>
+                                    <Text style={styles.label}>Tipo de Atributo:</Text>
+                                    <Chip
+                                        mode="flat"
+                                        style={styles.chip}
+                                        
+                                    >
+                                        {item.atributos.tipos_atributos.nombre}
+                                    </Chip>
+                                </View>
 
-                        const atributosFiltrados = tiposAtributos?.data.find(t => t.id.toString() === tipoSeleccionado)?.atributos || []
-
-                        return (
-                            <View style={styles.itemContainer}>
-                                <Text style={styles.label}>Tipo de Atributo:</Text>
-                                <Dropdown
-                                    label="Tipo de Atributo"
-                                    mode="outlined"
-                                    value={tipoSeleccionado}
-                                    onSelect={(value) => handleTypeChange(index, value)}
-                                    options={tiposAtributos?.data.map(tipo => ({ label: tipo.nombre, value: tipo.id.toString() })) || []}
-                                />
-
-                                <Text style={styles.label}>Atributo:</Text>
-                                <Dropdown
-                                    label="Atributo"
-                                    mode="outlined"
-                                    value={atributoSeleccionado}
-                                    onSelect={(value) => handleAttributeChange(index, value)}
-                                    options={atributosFiltrados.map(attr => ({ label: attr.valor, value: attr.id.toString() }))}
-                                />
-                                <Button mode='contained' onPress={() => handleDeleteAttribute(item)} icon='delete'>borrar</Button>
-                                <Button mode='contained' onPress={() => handleEdit(item)} icon='pencil'>editar</Button>
+                                <View>
+                                    <Text style={styles.label}>Atributo:</Text>
+                                    <Chip
+                                        mode="flat"
+                                        style={styles.chipAtributo}
+                                        compact
+                                    >
+                                        {item.atributos.valor}
+                                    </Chip>
+                                </View>
                             </View>
-                        )
-                    }}
+
+                            <View style={styles.actions}>
+                                <Button mode="elevated" onPress={() => handleEdit(item)} icon="pencil">
+                                    Editar
+                                </Button>
+                                <Button mode="elevated" onPress={() => handleDeleteAttribute(item)} icon="delete">
+                                    Borrar
+                                </Button>
+                            </View>
+                        </View>
+                    )}
                     ListFooterComponent={() => (
                         <View style={styles.actions}>
-                            <Button mode="contained" onPress={() => setOpenModalCrear(true)} style={styles.button}>
+                            <Button mode="contained" onPress={() => setOpenModalCrear(true)}>
                                 Agregar nuevo
                             </Button>
-                            <Button
-                                mode="outlined"
-                                onPress={onClose}
-                            >
+                            <Button mode="outlined" onPress={onClose}>
                                 Salir
                             </Button>
                         </View>
@@ -142,30 +154,53 @@ export const ListaAtributosVariacion = ({ variacion, visible, onClose }: Props) 
     )
 }
 
+
 const styles = StyleSheet.create({
+    list: {
+        padding: 9,
+    },
+    headerTitle: {
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
     modal: {
-        backgroundColor: 'white',
-        padding: 20,
+        padding: 10,
         marginHorizontal: 20,
         borderRadius: 8,
+
     },
     itemContainer: {
-        marginVertical: 10,
-        padding: 10,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 8,
+        marginBottom: 16,
+        padding: 12,
+        borderRadius: 1,
+        elevation: 1,
+    },
+    itemChipContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+
     },
     label: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginTop: 8,
         marginBottom: 4,
-        fontWeight: 'bold',
     },
+    chip: {
+        marginBottom: 8,
+    },
+    chipAtributo: {
+        marginBottom: 12,
+    },
+
     actions: {
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
-        gap: 10,
-        marginTop: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 8,
     },
     button: {
-        minWidth: 100,
+        marginTop: 8,
     },
-})
+});
+

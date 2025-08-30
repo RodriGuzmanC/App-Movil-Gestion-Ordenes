@@ -1,9 +1,11 @@
 import { useProductos } from '@/src/modules/productos/hooks/useProductos'
 import { ErrorItemsComponent, LoadingComponent, NoItemsComponent } from '@/src/shared/components/StatusComponents'
+import { Order } from '@/src/shared/interfaces/OrderModel'
 import { VariationWithRelations } from '@/src/shared/interfaces/VariationModel'
+import { Stack } from 'expo-router'
 import React, { useState } from 'react'
-import { ScrollView, StyleSheet } from 'react-native'
-import { HelperText, Text } from 'react-native-paper'
+import { ScrollView, StyleSheet, View } from 'react-native'
+import { Button, HelperText, Icon, Modal, Portal, Text, useTheme } from 'react-native-paper'
 import { Dropdown } from 'react-native-paper-dropdown'
 import { useOrdenById } from '../../hooks/useOrdenes'
 import ListaVariacionesFiltro from '../components/ListaVariacionesFiltro'
@@ -11,10 +13,11 @@ import ResumenOrden from '../components/ResumenOrden'
 import { Cantidades, Precios } from '../schemas/OrdenDetalleSchema'
 
 interface Props {
-  orderId: number
+  orderId: number,
+  tipoOrden: Order['categoria_pedido']
 }
 
-const OrderDetailCreateScreen: React.FC<Props> = ({ orderId }) => {
+const OrderDetailCreateScreen: React.FC<Props> = ({ orderId, tipoOrden }) => {
 
   // Estados para la paginación y límite de productos
   const [pagina, setPagina] = useState(1)
@@ -41,6 +44,9 @@ const OrderDetailCreateScreen: React.FC<Props> = ({ orderId }) => {
   const [cantidades, setCantidades] = useState<Cantidades[]>([])
   const [precios, setPrecios] = useState<Precios[]>([])
   const [submits, setSubmits] = useState<Record<number, () => void>>({})
+
+  const theme = useTheme()
+
 
   const registrarSubmit = (variacionId: number, submitFunction: () => void) => {
     setSubmits(prev => ({
@@ -157,6 +163,24 @@ const OrderDetailCreateScreen: React.FC<Props> = ({ orderId }) => {
 
 
 
+  const [modalVisible, setModalVisible] = useState(false);
+
+
+  const totalCantidad = cantidades.reduce((total, item) => total + item.cantidad, 0)
+
+  const totalSoles = precios.reduce((total, itemPrecios) => {
+    const cantidadInd = cantidades.find(itemCantidad => itemCantidad.variacionId === itemPrecios.variacionId)
+
+    const subtotal = (cantidadInd?.cantidad ?? 0) * itemPrecios.precio;
+
+    return +(total + subtotal).toFixed(2);  // Redondea después de cada suma
+  }, 0)
+
+  const handleCrearPedido = () => {
+    Object.values(submits).forEach(submit => submit())
+  }
+
+
 
   // Manejo de erros y estados de carga
   if (cargando && pagina === 1) return <LoadingComponent message="Cargando categorías..." />
@@ -165,62 +189,139 @@ const OrderDetailCreateScreen: React.FC<Props> = ({ orderId }) => {
   if (!productos) return <NoItemsComponent message="No hay categorías disponibles." />
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text variant="titleLarge" style={styles.title}>
-        Crear Detalle de Pedido
-      </Text>
-      {/* Seleccionador de producto */}
-      <Dropdown
-        label="Productos"
-        mode="outlined"
-        options={productos?.data.map(product => ({
-          label: product.nombre_producto,
-          value: product.id.toString()
-        })) || []}
-        onSelect={(value) => {
-          handleProductoChange(value)
+    <View style={{ flex: 1, position: 'relative' }}>
+      <Stack.Screen
+        options={{
+          title: `${tipoOrden == 'salida' ? 'Venta' : 'Pedido'} N° ${orderId}`,
+          headerTitleAlign: 'center',
         }}
-      />
+      ></Stack.Screen>
 
-      {!productoIdSeleccionado && <HelperText type="error" visible={true}>Selecciona un producto para continuar</HelperText>}
 
-      {visible && productoIdSeleccionado && (
-        <ListaVariacionesFiltro
-          productoId={productoIdSeleccionado}
-          handlerAgregarDePedido={handlerAgregarDePedido}
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          contentContainerStyle={styles.modalContainer}
+        >
+          <Dropdown
+            label="Productos"
+            mode="outlined"
+            options={
+              productos?.data.map(product => ({
+                label: product.nombre_producto,
+                value: product.id.toString(),
+              })) || []
+            }
+            onSelect={handleProductoChange}
+          />
 
-        ></ListaVariacionesFiltro>
-      )}
+          {!productoIdSeleccionado && (
+            <HelperText type="error" visible={true}>
+              Selecciona un producto para continuar
+            </HelperText>
+          )}
 
-      <ResumenOrden
-        variacionesSeleccionadas={variacionesSeleccionadas}
-        orderId={orderId}
-        tipoOrden={ordenById?.data.tipo_pedido ?? 'mayorista'} // cambiar
-        cantidades={cantidades}
-        precios={precios}
-        registrarSubmit={registrarSubmit}
-        handlerQuitarDePedido={handlerQuitarDePedido}
-        modificarCantidad={modificarCantidad}
-        modificarPrecio={modificarPrecio}
-        submits={submits}
-      ></ResumenOrden>
-    </ScrollView>
+          <ScrollView>
+            {productoIdSeleccionado && (
+              <ListaVariacionesFiltro
+                productoId={productoIdSeleccionado}
+                handlerAgregarDePedido={handlerAgregarDePedido}
+                productos={productos.data}
+              />
+            )}
+          </ScrollView>
+
+          <Button mode='contained' onPress={() => setModalVisible(false)}>
+            Cerrar
+          </Button>
+        </Modal>
+      </Portal>
+      <View style={{ padding: 16, flex: 1 }}>
+        <>
+          <View >
+            <Button mode="contained" onPress={() => setModalVisible(true)}>
+              Empezar a agregar un Producto
+            </Button>
+          </View>
+
+
+          <ResumenOrden
+            variacionesSeleccionadas={variacionesSeleccionadas}
+            orderId={orderId}
+            tipoOrden={ordenById?.data.tipo_pedido ?? 'mayorista'} // cambiar
+            cantidades={cantidades}
+            precios={precios}
+            registrarSubmit={registrarSubmit}
+            handlerQuitarDePedido={handlerQuitarDePedido}
+            modificarCantidad={modificarCantidad}
+            modificarPrecio={modificarPrecio}
+            submits={submits}
+            productos={productos.data}
+          ></ResumenOrden>
+
+          <View style={[styles.footerContainer, { backgroundColor: theme.colors.background }]}>
+            <View style={styles.footerContent}>
+              <Icon source="cube-outline" size={20} />
+              <Text style={styles.footerText}>Total: {totalCantidad} unidades</Text>
+            </View>
+
+            <View style={styles.footerContent}>
+              <Icon source="cash-multiple" size={20} />
+              <Text style={styles.footerText}>Monto: S/ {totalSoles}</Text>
+            </View>
+
+            <Button
+              icon="check-circle"
+              mode='contained'
+              style={styles.createButton}
+              disabled={Object.keys(submits).length === 0}
+              onPress={handleCrearPedido}
+            >
+              Crear {tipoOrden == 'salida' ? 'Venta' : 'Pedido'}
+            </Button>
+          </View>
+
+        </>
+      </View>
+    </View>
   )
 }
 
 export default OrderDetailCreateScreen
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
   title: {
     marginBottom: 16,
     textAlign: 'center',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    margin: 20,
+    borderRadius: 8,
+    gap: 10,
+    maxHeight: '100%'
+  },
+  cerrarBtn: {
+    marginTop: 20,
+  },
+
+  footerContainer: {
+    paddingTop: 16,
+    gap: 4
+  },
+  footerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  footerText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  createButton: {
+    borderRadius: 6,
   },
 })

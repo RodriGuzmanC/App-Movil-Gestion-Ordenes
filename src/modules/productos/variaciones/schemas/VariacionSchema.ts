@@ -12,7 +12,7 @@ export const variacionSchema = yup.object().shape({
     .typeError('Debe ser un número')
     .positive('Debe ser mayor que cero')
     .required('El precio mayorista es obligatorio'),
-  stock: yup.number().min(0, 'Debe ser mayor o igual a 0').required('El stock es obligatorio')
+  stock: yup.number().min(1, 'Debe ser mayor a 0').required('El stock es obligatorio')
 });
 
 export type VariacionFormData = yup.InferType<typeof variacionSchema>

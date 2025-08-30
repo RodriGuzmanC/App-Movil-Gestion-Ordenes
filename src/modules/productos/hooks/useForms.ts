@@ -1,11 +1,13 @@
 import queryKeys from "@/src/shared/constants/queryKeys"
 import { useCatchErrors } from "@/src/shared/hooks/useCatchErorrs"
 import { CategoryProductWithRelations } from "@/src/shared/interfaces/CategoryProductModel"
+import { CloudinaryResponse } from "@/src/shared/interfaces/extras/CloudinaryTypes"
 import { AlertService } from "@/src/shared/utils/AlertService"
 import { useRouter } from "expo-router"
 import { useFormik } from "formik"
 import { useEffect, useState } from "react"
 import { mutate } from "swr"
+import { subirImagenProducto } from "../api/productoApi"
 import { ProductoFormData, productoSchema } from "../schemas/ProductSchema"
 import { useCrearProducto, useEditarCategoriaProducto, useEditarProducto, useEliminarProducto, useProductoById } from "./useProductos"
 
@@ -28,20 +30,50 @@ export const useProductoCrearForm = () => {
       descripcion: '',
       precio_unitario: '' as unknown as number,
       precio_mayorista: '' as unknown as number,
+      url_imagen: '',
       categorias: [] as number[],
-
+      imagen: undefined as File | undefined,
     },
     validationSchema: productoSchema,
     onSubmit: async (values, { resetForm }) => {
-
       await catchErrors(async () => {
-        const result = await ejecutarCrear(values)
+
+        // Crear imagen
+        if (values.imagen != undefined) {
+          const formData = new FormData();
+          formData.append("file", values.imagen as any);
+          const cloudinaryRes: CloudinaryResponse = await subirImagenProducto(formData);
+          if (cloudinaryRes && typeof cloudinaryRes === "object" && "error" in cloudinaryRes) {
+            // Es un CloudinaryErrorResponse
+            const errorRes = cloudinaryRes;
+            console.error("Error al subir:", errorRes.error.message);
+          } else {
+            // Es un CloudinaryUploadResponse
+            const response = cloudinaryRes;
+            console.log("Imagen subida!");
+            console.log("URL segura:", response.secure_url);
+            // Asignar la URL de la imagen al producto
+            values.url_imagen = response.secure_url;
+          }
+        }
+        // Determinamos los valores a enviar
+        const { nombre_producto, descripcion, url_imagen, precio_unitario, precio_mayorista } = values;
+        const body = {
+          nombre_producto,
+          descripcion,
+          url_imagen,
+          precio_unitario,
+          precio_mayorista,
+        };
+
+        // Crear producto
+        const result = await ejecutarCrear(body)
 
         if (!result) throw new Error('Error al crear el producto')
         resetForm()
         AlertService.show('Producto creado exitosamente', 'success')
         mutate(queryKeys.productos)
-        router.navigate('/(tabs)')
+        router.navigate(`/(tabs)/productos/${result.data.id}`)
       })
     },
   })
@@ -83,25 +115,60 @@ export const useProductoEditarForm = (id: number) => {
       precio_unitario: '' as unknown as number,
       precio_mayorista: '' as unknown as number,
       categorias: [] as number[],
+      url_imagen: '',
+      imagen: undefined as File | undefined,
     },
     enableReinitialize: true,
     validationSchema: productoSchema,
     onSubmit: async (values, { resetForm }) => {
       await catchErrors(async () => {
+        // Crear imagen
+        if (values.imagen != undefined) {
+          const formData = new FormData();
+          formData.append("file", values.imagen as any);
+          const cloudinaryRes: CloudinaryResponse = await subirImagenProducto(formData);
+          if (cloudinaryRes && typeof cloudinaryRes === "object" && "error" in cloudinaryRes) {
+            // Es un CloudinaryErrorResponse
+            const errorRes = cloudinaryRes;
+            console.error("Error al subir:", errorRes.error.message);
+          } else {
+            // Es un CloudinaryUploadResponse
+            const response = cloudinaryRes;
+            console.log("Imagen subida!");
+            console.log("URL segura:", response.secure_url);
+            // Asignar la URL de la imagen al producto
+            values.url_imagen = response.secure_url;
+          }
+        }
+        // Determinamos los valores a enviar
+        const { nombre_producto, descripcion, url_imagen, precio_unitario, precio_mayorista } = values;
+        const body = {
+          nombre_producto,
+          descripcion,
+          url_imagen,
+          precio_unitario,
+          precio_mayorista,
+        };
+
+
         // Editar el producto
-        //const result = await ejecutarEditar(values)
+        const result = await ejecutarEditar(body)
 
         // Editar las categorías asociadas
+        if (values.categorias == undefined) {
+          values.categorias = []
+
+        }
         const categoriasFiltradas = values.categorias.filter((id): id is number => id !== undefined)
         const resultCat = await ejecutarEditarCategorias({ categoriasSeleccionadas: categoriasFiltradas })
         console.log("Categorias filtradas para evitar valores undefined:")
         console.log(categoriasFiltradas)
 
         //if (!result) throw new Error('Error al crear el producto')
-        //resetForm()
+        resetForm()
         AlertService.show('Producto editado exitosamente', 'success')
         mutate(queryKeys.productos)
-        //router.navigate('/(tabs)')
+        router.navigate(`/(tabs)/productos/${result.data.id}`)
       })
     },
   })
@@ -120,6 +187,7 @@ export const useProductoEditarForm = (id: number) => {
         precio_unitario: productoById.data.precio_unitario || 0,
         precio_mayorista: productoById.data.precio_mayorista || 0,
         categorias: categorias,
+        url_imagen: productoById.data.url_imagen || '',
       })
 
       setCategoriasIniciales(categorias)
@@ -147,7 +215,7 @@ export const useProductoEliminarForm = (id: number | string) => {
       if (!result) throw new Error('Error al eliminar el producto')
       AlertService.show('Producto eliminado exitosamente', 'success')
       mutate(queryKeys.productos)
-      router.navigate('/(tabs)')
+      router.navigate('/(tabs)/productos')
     })
   }
 

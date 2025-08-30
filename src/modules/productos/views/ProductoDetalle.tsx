@@ -1,6 +1,7 @@
 import { ErrorItemsComponent, LoadingComponent, NoItemsComponent } from '@/src/shared/components/StatusComponents'
 import { VariationWithRelations } from '@/src/shared/interfaces/VariationModel'
-import { useRouter } from 'expo-router'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { Stack, useRouter } from 'expo-router'
 import React, { useState } from 'react'
 import { ScrollView, StyleSheet, View } from 'react-native'
 import { Button, Card, Chip, Divider, List, Text } from 'react-native-paper'
@@ -34,7 +35,7 @@ export const ProductoDetalle = ({ id }: { id: number | string }) => {
 
   const handleEditarDetalle = () => {
     router.navigate({
-      pathname: '/productos/[id]',
+      pathname: '/productos/edit/[id]',
       params: { "id": id.toString() }
     })
   }
@@ -49,6 +50,13 @@ export const ProductoDetalle = ({ id }: { id: number | string }) => {
 
   return (
     <>
+      <Stack.Screen
+        options={{
+          title: `${producto.nombre_producto}`,
+          headerTitleAlign: 'center'
+        }}
+      ></Stack.Screen>
+
       <VariacionCrearModal
         onClose={() => setModalCreateVisible(false)}
         visible={modalCreateVisible}
@@ -76,22 +84,49 @@ export const ProductoDetalle = ({ id }: { id: number | string }) => {
       )}
 
       <ScrollView contentContainerStyle={styles.container}>
-        <Card style={styles.card}>
+        <Card style={styles.card} mode="elevated">
           {producto.url_imagen ? (
             <Card.Cover source={{ uri: producto.url_imagen }} />
           ) : (
-            <Card.Title title="Sin Imagen" />
+            <View style={styles.noImageContainer}>
+              <MaterialCommunityIcons name="image-off" size={64} />
+              <Text variant="titleMedium">Sin Imagen</Text>
+            </View>
           )}
+
           <Card.Content>
-            <Text variant="titleLarge" style={styles.title}>{producto.nombre_producto}</Text>
-            <Text variant="bodyMedium" style={styles.description}>{producto.descripcion}</Text>
-            <Text variant="bodyMedium">Estado: {producto.estados_productos?.nombre}</Text>
-            <Text variant="bodyMedium">Precio Unitario: ${producto.precio_unitario}</Text>
-            <Text variant="bodyMedium">Precio Mayorista: ${producto.precio_mayorista}</Text>
-            <Text variant="bodyMedium">Stock Total: {producto.stock}</Text>
+            <Text variant="titleLarge" style={styles.title}>
+              {producto.nombre_producto}
+            </Text>
+
+            <Text variant="bodyMedium" style={styles.description}>
+              {producto.descripcion}
+            </Text>
+
+            <Divider style={styles.divider} />
+
+            <Text variant="bodyMedium">
+              <MaterialCommunityIcons name="information-outline" size={16} /> Estado: {producto.estados_productos?.nombre}
+            </Text>
+
+            <Text variant="bodyMedium">
+              <MaterialCommunityIcons name="currency-usd" size={16} /> Precio Unitario: ${producto.precio_unitario}
+            </Text>
+
+            <Text variant="bodyMedium">
+              <MaterialCommunityIcons name="cart-outline" size={16} /> Precio Mayorista: ${producto.precio_mayorista}
+            </Text>
+
+            <View style={styles.stockContainer}>
+              <MaterialCommunityIcons name="cube-outline" size={16} />
+              <Chip style={styles.stockChip} icon="cube">{`Stock: ${producto.stock}`}</Chip>
+            </View>
           </Card.Content>
+
           <Card.Actions>
-            <Button mode="contained" onPress={handleEditarDetalle}>Editar Producto</Button>
+            <Button mode="contained" onPress={handleEditarDetalle}>
+              Editar Producto
+            </Button>
           </Card.Actions>
         </Card>
 
@@ -101,7 +136,7 @@ export const ProductoDetalle = ({ id }: { id: number | string }) => {
           {producto.variaciones.map((variacion) => (
             <Card key={variacion.id} style={styles.variacionCard}>
               <Card.Content>
-                <Text variant="titleMedium">Variación ID: {variacion.id}</Text>
+                <Text variant="titleMedium">Variación N°: {variacion.id}</Text>
                 <Text>Precio Unitario: ${variacion.precio_unitario}</Text>
                 <Text>Precio Mayorista: ${variacion.precio_mayorista}</Text>
                 <Text>Stock: {variacion.stock}</Text>
@@ -115,7 +150,7 @@ export const ProductoDetalle = ({ id }: { id: number | string }) => {
                 </View>
 
                 <View style={styles.actionsRow}>
-                  <Button mode="outlined" onPress={() => handleEditarVariaciones(variacion)}>Editar</Button>
+                  <Button mode="contained" onPress={() => handleEditarVariaciones(variacion)}>Editar</Button>
                   <Button mode="outlined" textColor="red" onPress={() => handleEliminar(variacion)}>Eliminar</Button>
                 </View>
               </Card.Content>
@@ -139,7 +174,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    marginBottom: 8,
+    marginVertical: 8,
+    
   },
   description: {
     marginBottom: 8,
@@ -168,5 +204,22 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginTop: 16,
+  },
+
+  stockChip: {
+    marginLeft: 6,
+  },
+
+  stockContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+
+
+  noImageContainer: {
+    height: 180,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })

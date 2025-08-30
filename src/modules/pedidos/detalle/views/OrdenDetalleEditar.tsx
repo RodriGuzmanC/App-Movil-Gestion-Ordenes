@@ -1,6 +1,6 @@
 import { OrderDetail } from '@/src/shared/interfaces/OrderDetailModel'
 import { StyleSheet, View } from 'react-native'
-import { ActivityIndicator, Button, HelperText, Modal, Portal, Text, TextInput } from 'react-native-paper'
+import { ActivityIndicator, Button, HelperText, Modal, Portal, Text, TextInput, useTheme } from 'react-native-paper'
 import { useDetalleOrdenEditarForm } from '../hooks/useForms'
 
 interface VariacionEditarModalProps {
@@ -12,6 +12,9 @@ interface VariacionEditarModalProps {
 }
 
 export const OrdenDetalleEditar = ({ visible, onClose, orderId, detalleId, orderDetailObj }: VariacionEditarModalProps) => {
+    
+    const theme = useTheme()
+
     const {
         handleChange,
         handleBlur,
@@ -29,7 +32,7 @@ export const OrdenDetalleEditar = ({ visible, onClose, orderId, detalleId, order
 
     return (
         <Portal>
-            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modal}>
+            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.background }]}>
                 <Text variant="titleMedium" style={styles.title}>
                     Editando detalle de orden
                 </Text>
@@ -99,7 +102,6 @@ export const OrdenDetalleEditar = ({ visible, onClose, orderId, detalleId, order
 
 const styles = StyleSheet.create({
     modal: {
-        backgroundColor: 'white',
         padding: 20,
         marginHorizontal: 20,
         borderRadius: 8,

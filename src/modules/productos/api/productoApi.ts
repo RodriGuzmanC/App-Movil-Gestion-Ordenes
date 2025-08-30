@@ -1,5 +1,6 @@
 import { CategoryProduct } from "@/src/shared/interfaces/CategoryProductModel";
 import { DataResponse, PaginatedResponse } from "@/src/shared/interfaces/extras/ApiResponses";
+import { CloudinaryResponse } from "@/src/shared/interfaces/extras/CloudinaryTypes";
 import { Product, ProductWithFullRelations } from "@/src/shared/interfaces/ProductModel";
 import { fetchWithAuth } from "@/src/shared/utils/fetchWithAuth";
 
@@ -89,4 +90,40 @@ export const eliminarCategoriaProducto = async (productoId: number, categoriaPro
     method: 'DELETE',
   })
 }
+
+
+
+
+/**
+ * Crear una imagen de producto.
+ * @param data Datos del nuevo producto.
+ * @returns DataResponse<Product>
+ */
+export const subirImagenProducto = async (
+  data: FormData
+): Promise<CloudinaryResponse> => {
+  return await fetchWithAuth(`products/image`, {
+    method: 'POST',
+    body: data,
+  });
+};
+
+
+/**
+ * Crear una imagen de producto.
+ * @param data Datos del nuevo producto.
+ * @returns DataResponse<Product>
+ */
+export const actualizarImagenProducto = async (
+  imagenUrl: string,
+  data: FormData
+): Promise<DataResponse<CloudinaryResponse>> => {
+  return await fetchWithAuth(`/products/image`, {
+    method: 'UPDATE',
+    body: JSON.stringify({
+      url_imagen: imagenUrl,
+      formData: data
+    }),
+  });
+};
 

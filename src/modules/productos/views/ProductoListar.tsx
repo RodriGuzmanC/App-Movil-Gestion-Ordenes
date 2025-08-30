@@ -1,16 +1,19 @@
 
 import { LoadMore } from '@/src/shared/components/LoadMore'
 import { ErrorItemsComponent, LoadingComponent, NoItemsComponent } from '@/src/shared/components/StatusComponents'
+import queryKeys from '@/src/shared/constants/queryKeys'
 import { Product } from '@/src/shared/interfaces/ProductModel'
 import { PaginatedResponse } from '@/src/shared/interfaces/extras/ApiResponses'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import {
   FlatList,
+  RefreshControl,
   StyleSheet,
   View
 } from 'react-native'
-import { Button, Card, Text } from 'react-native-paper'
+import { Button, Card, Chip, Text } from 'react-native-paper'
+import { mutate } from 'swr'
 import { useProductos } from '../hooks/useProductos'
 import { ProductoEliminarModal } from './ProductoEliminarModal'
 
@@ -18,7 +21,7 @@ import { ProductoEliminarModal } from './ProductoEliminarModal'
 export const ProductoListar = () => {
   // Basicos para cargar productos
   const [pagina, setPagina] = useState<number>(1)
-  const [limite, setLimite] = useState<number>(1)
+  const [limite, setLimite] = useState<number>(10)
   const { productos, cargando, error } = useProductos(pagina, limite)
 
   // Basico para paginacion
@@ -66,6 +69,10 @@ export const ProductoListar = () => {
     setProductoAEliminar(id)
   }
 
+  const handleRefresh = () => {
+        mutate(queryKeys.productos(pagina, limite))
+    }
+
   if (cargando) return <LoadingComponent></LoadingComponent>
   if (productos == undefined || !productos.data) return <NoItemsComponent />
   if (error) <ErrorItemsComponent></ErrorItemsComponent>
@@ -74,18 +81,27 @@ export const ProductoListar = () => {
   return (
     <>
       <FlatList
+        style={{ marginVertical: 10 }}
         data={productosAcumulados}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
+        refreshControl={<RefreshControl refreshing={cargando} onRefresh={handleRefresh} />}
         renderItem={({ item }) => (
-          <Card style={styles.card}>
+          <Card style={styles.card} mode="elevated">
             <View style={styles.row}>
               <Card.Cover source={{ uri: item.url_imagen }} style={styles.image} />
 
               <View style={styles.infoContainer}>
                 <View style={styles.header}>
-                  <Text variant="titleMedium">{item.nombre_producto}</Text>
+                  <Text variant="titleMedium" style={styles.productName}>
+                    {item.nombre_producto}
+                  </Text>
+                  
                 </View>
+
+                <Chip icon="cube" compact elevated>
+                    Stock: {item.stock}
+                  </Chip>
 
                 <Text variant="bodyMedium" numberOfLines={2} style={styles.description}>
                   {item.descripcion}
@@ -94,7 +110,9 @@ export const ProductoListar = () => {
                 <View style={styles.actions}>
                   <Button onPress={() => handleEditar(item.id)}>Editar</Button>
                   <Button onPress={() => handleVerDetalle(item.id)}>Ver</Button>
-                  <Button onPress={() => handleEliminar(item.id)} textColor="red">Eliminar</Button>
+                  <Button onPress={() => handleEliminar(item.id)} textColor="red">
+                    Eliminar
+                  </Button>
                 </View>
               </View>
             </View>
@@ -130,6 +148,8 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 12,
+    borderRadius: 12,
+    elevation: 2,
   },
   row: {
     flexDirection: 'row',
@@ -143,24 +163,22 @@ const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
     padding: 12,
+    gap: 8,
     justifyContent: 'space-between',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
   },
-  stock: {
-    backgroundColor: '#eee',
-    color: '#333',
+  productName: {
+    flex: 1,
+    marginRight: 8,
   },
   description: {
-    marginBottom: 8,
-
+    marginBottom: 12,
   },
   actions: {
     flexDirection: 'row',
-    gap: 6,
   },
 });

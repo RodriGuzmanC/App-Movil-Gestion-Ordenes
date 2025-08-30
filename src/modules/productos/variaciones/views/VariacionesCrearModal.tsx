@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import { ActivityIndicator, Button, HelperText, Modal, Portal, Text, TextInput } from 'react-native-paper'
+import { ActivityIndicator, Button, HelperText, Modal, Portal, Text, TextInput, useTheme } from 'react-native-paper'
 import { useVariacionCrearForm } from '../hooks/useForms'
 
 interface VariacionCrearModalProps {
@@ -25,9 +25,11 @@ export const VariacionCrearModal = ({ visible, onClose, productoId }: VariacionC
     onClose()
   }
 
+  const theme = useTheme()
+
   return (
     <Portal>
-      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
+      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
         <View style={styles.form}>
           <Text style={styles.title}>Crear variación</Text>
 
@@ -74,7 +76,7 @@ export const VariacionCrearModal = ({ visible, onClose, productoId }: VariacionC
             <Button onPress={onClose} mode="outlined" style={styles.button}>
               Cancelar
             </Button>
-            <Button onPress={handleSubmitAndClose} mode="contained" loading={isSubmitting || enProceso} style={styles.button}>
+            <Button onPress={() => handleSubmit()} mode="contained" loading={isSubmitting || enProceso} style={styles.button}>
               Guardar
             </Button>
           </View>
@@ -88,7 +90,6 @@ export const VariacionCrearModal = ({ visible, onClose, productoId }: VariacionC
 
 const styles = StyleSheet.create({
   modalContainer: {
-    backgroundColor: 'white',
     margin: 20,
     borderRadius: 10,
     padding: 20,

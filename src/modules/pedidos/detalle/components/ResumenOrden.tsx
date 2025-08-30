@@ -1,8 +1,9 @@
 import { Order } from '@/src/shared/interfaces/OrderModel'
+import { Product } from '@/src/shared/interfaces/ProductModel'
 import { VariationWithRelations } from '@/src/shared/interfaces/VariationModel'
 import React from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import { Button, Divider } from 'react-native-paper'
+import { ScrollView, StyleSheet } from 'react-native'
+import { Text as PaperText } from 'react-native-paper'
 import { Cantidades, Precios } from '../schemas/OrdenDetalleSchema'
 import TarjetaVariacionOrden from './TarjetaVariacionOrden'
 
@@ -17,6 +18,7 @@ interface Props {
     modificarPrecio: (variacionId: number, nuevoPrecio: number) => void
     handlerQuitarDePedido: (variacionId: number) => void
     submits: Record<number, () => void>
+    productos: Product[]
 }
 
 
@@ -30,7 +32,8 @@ export default function ResumenOrden({
     handlerQuitarDePedido,
     modificarCantidad,
     modificarPrecio,
-    submits
+    submits,
+    productos
 }: Props) {
 
 
@@ -49,8 +52,11 @@ export default function ResumenOrden({
     }
 
     return (
-        <View style={styles.container}>
-            <ScrollView style={{ flex: 1 }}>
+        <>
+            <PaperText variant="titleLarge" style={{ marginTop: 16 }}>Resumen de Pedido</PaperText>
+
+            <ScrollView style={{ flex: 1, display: 'flex', flexDirection: 'column', marginVertical: 8, paddingVertical: 8 }}>
+
 
                 {variacionesSeleccionadas.map((variacion) => (
                     <TarjetaVariacionOrden
@@ -62,30 +68,19 @@ export default function ResumenOrden({
                         handlerQuitarDePedido={handlerQuitarDePedido}
                         modificarCantidad={modificarCantidad}
                         modificarPrecio={modificarPrecio}
+                        nombreProducto={productos.find(p => p.id === variacion.producto_id)?.nombre_producto ?? 'No encontrado, error'}
+                        imagenProducto={productos.find(p => p.id === variacion.producto_id)?.url_imagen ?? 'No encontrado, error'}
                     ></TarjetaVariacionOrden>
                 ))}
-            </ScrollView>
 
-            {/* Footer - Totales */}
-            <Divider />
-            <View style={styles.footer}>
-                <Text style={styles.totalText}>Total: {totalCantidad} unidades</Text>
-                <Text style={styles.totalText}>Monto: S/ {totalSoles}</Text>
-            </View>
 
-            <Button
-                mode='contained-tonal'
-                disabled={Object.keys(submits).length === 0}
-                onPress={handleCrearPedido}
-            >Crear</Button>
-        </View >
+            </ScrollView >
+        </>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
+
     card: {
         margin: 8,
     },
@@ -101,11 +96,9 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         marginHorizontal: 8,
-        backgroundColor: 'white',
     },
     footer: {
         padding: 12,
-        backgroundColor: '#f2f2f2',
         flexDirection: 'column',
         alignItems: 'center',
     },
@@ -114,4 +107,5 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginVertical: 4,
     },
+
 })

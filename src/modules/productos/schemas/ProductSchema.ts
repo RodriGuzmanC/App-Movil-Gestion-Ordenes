@@ -9,7 +9,7 @@ export const productoSchema = yup.object().shape({
     .positive('Debe ser mayor que cero')
     .required('El precio es obligatorio'),
   descripcion: yup.string().required('La descripción es obligatoria'),
-  //url_imagen: yup.string().url('Debe ser una URL válida').required('La imagen es obligatoria'),
+  url_imagen: yup.string().optional(),
   precio_mayorista: yup
     .number()
     .typeError('Debe ser un número')
@@ -27,6 +27,10 @@ export const productoSchema = yup.object().shape({
     )
     .min(1, 'Debe seleccionar al menos una categoría')
     .required('Debe seleccionar al menos una categoría'),
+  imagen: yup.mixed<File>()
+    .optional()
+    .test("fileSize", "El archivo es muy grande", (file) => !file || file.size <= 10_000_000) // 10MB
+    .test("fileType", "Formato no soportado", (file) => !file || ["image/jpeg", "image/png"].includes(file.type)),
 });
 
 export type ProductoFormData = yup.InferType<typeof productoSchema>

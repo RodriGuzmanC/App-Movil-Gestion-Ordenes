@@ -1,7 +1,8 @@
 import { useClientes } from '@/src/modules/clientes/hooks/useClientes'
 import { Order } from '@/src/shared/interfaces/OrderModel'
+import { ajustarFechaSinZona } from '@/src/shared/utils/datetimeConvert'
 import React from 'react'
-import { ScrollView, View } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import { Button, HelperText, RadioButton, Text } from 'react-native-paper'
 import { DatePickerInput } from 'react-native-paper-dates'
 import { Dropdown } from 'react-native-paper-dropdown'
@@ -25,13 +26,13 @@ export const CrearOrdenScreen = ({ tipoPedido = "entrada" }: {tipoPedido: Order[
   } = useOrdenCrearForm(tipoPedido)
 
   return (
-    <ScrollView className="flex-1 p-4">
-      <Text className="text-lg mb-4 font-bold">Crear Pedido ({tipoPedido.toUpperCase()})</Text>
+    <ScrollView contentContainerStyle={styles.container}>
 
+      {/* Cliente */}
       <Dropdown
         label="Cliente"
         mode="outlined"
-        value={values.cliente_id ? values.cliente_id.toString() : ''}
+        value={values.cliente_id?.toString() || ''}
         onSelect={(value) => setFieldValue('cliente_id', parseInt(value ?? '0'))}
         options={clientes?.data.map(cliente => ({
           label: cliente.nombre,
@@ -42,10 +43,11 @@ export const CrearOrdenScreen = ({ tipoPedido = "entrada" }: {tipoPedido: Order[
         {errors.cliente_id}
       </HelperText>
 
+      {/* Estado Pedido */}
       <Dropdown
         label="Estado del Pedido"
         mode="outlined"
-        value={values.estado_pedido_id ? values.estado_pedido_id.toString() : ''}
+        value={values.estado_pedido_id?.toString() || ''}
         onSelect={(value) => setFieldValue('estado_pedido_id', parseInt(value ?? '0'))}
         options={estadosPedidos?.data.map(estado => ({
           label: estado.nombre,
@@ -56,10 +58,11 @@ export const CrearOrdenScreen = ({ tipoPedido = "entrada" }: {tipoPedido: Order[
         {errors.estado_pedido_id}
       </HelperText>
 
+      {/* Método de Entrega */}
       <Dropdown
         label="Método de Entrega"
         mode="outlined"
-        value={values.metodo_entrega_id ? values.metodo_entrega_id.toString() : ''}
+        value={values.metodo_entrega_id?.toString() || ''}
         onSelect={(value) => setFieldValue('metodo_entrega_id', parseInt(value ?? '0'))}
         options={metodosEntrega?.data.map(metodo => ({
           label: metodo.nombre,
@@ -70,50 +73,55 @@ export const CrearOrdenScreen = ({ tipoPedido = "entrada" }: {tipoPedido: Order[
         {errors.metodo_entrega_id}
       </HelperText>
 
-      <View className="mt-4">
-        <Text className="mb-2">Tipo de Pedido</Text>
+      {/* Tipo de Pedido */}
+      <View style={styles.section}>
+        <Text style={styles.label}>Tipo de Pedido</Text>
         <RadioButton.Group
           onValueChange={handleChange('tipo_pedido')}
           value={values.tipo_pedido}
         >
-          <View className="flex-row items-center mb-2">
+          <View style={{ flexDirection: 'row', gap: 16 }}>
+            <View style={styles.radioRow}>
             <RadioButton value="mayorista" />
             <Text>Mayorista</Text>
           </View>
-          <View className="flex-row items-center">
+          <View style={styles.radioRow}>
             <RadioButton value="minorista" />
             <Text>Minorista</Text>
+          </View>
           </View>
         </RadioButton.Group>
       </View>
 
-      <View className="mt-4">
-        <Text className="mb-2">Fecha de pedido</Text>
+      {/* Fecha Pedido */}
+      <View style={styles.section}>
+        <Text style={styles.label}>Fecha de Pedido</Text>
         <DatePickerInput
           locale="es"
           label="Fecha de pedido"
           value={values.fecha_pedido ? new Date(values.fecha_pedido) : undefined}
           onChange={(date) => {
             if (date) {
-              setFieldValue('fecha_pedido', date.toISOString().split('T')[0])
+              setFieldValue('fecha_pedido', ajustarFechaSinZona(date))
             }
           }}
           inputMode="start"
         />
-        <HelperText type="error" visible={!!errors.fecha_entrega && touched.fecha_entrega}>
-          {errors.fecha_entrega}
+        <HelperText type="error" visible={!!errors.fecha_pedido && touched.fecha_pedido}>
+          {errors.fecha_pedido}
         </HelperText>
       </View>
 
-      <View className="mt-4">
-        <Text className="mb-2">Fecha de Entrega</Text>
+      {/* Fecha Entrega */}
+      <View style={styles.section}>
+        <Text style={styles.label}>Fecha de Entrega</Text>
         <DatePickerInput
           locale="es"
           label="Fecha de entrega"
           value={values.fecha_entrega ? new Date(values.fecha_entrega) : undefined}
           onChange={(date) => {
             if (date) {
-              setFieldValue('fecha_entrega', date.toISOString().split('T')[0])
+              setFieldValue('fecha_entrega', ajustarFechaSinZona(date))
             }
           }}
           inputMode="start"
@@ -123,15 +131,43 @@ export const CrearOrdenScreen = ({ tipoPedido = "entrada" }: {tipoPedido: Order[
         </HelperText>
       </View>
 
+      {/* Botón Guardar */}
       <Button
         mode="contained"
         onPress={() => handleSubmit()}
         loading={enProceso}
         disabled={enProceso}
-        className="mt-6"
+        style={styles.submitButton}
+        icon="content-save"
       >
         Guardar Pedido
       </Button>
     </ScrollView>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  title: {
+    marginBottom: 16,
+    fontWeight: 'black',
+    fontSize: 18,
+  },
+  section: {
+    marginTop: 2,
+  },
+  label: {
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  radioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  submitButton: {
+    marginTop: 2,
+  },
+});

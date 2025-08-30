@@ -1,7 +1,7 @@
 import { useTiposAtributosConValores } from '@/src/modules/caracteristicas/hooks/useCaracteristicas'
 import React, { useState } from 'react'
 import { StyleSheet } from 'react-native'
-import { Button, Modal, Portal, Text } from 'react-native-paper'
+import { Button, Modal, Portal, Text, useTheme } from 'react-native-paper'
 import { Dropdown } from 'react-native-paper-dropdown'
 import { useAtributoVariacionCrearForm } from '../hooks/useForms'
 
@@ -43,9 +43,11 @@ export const AtributoVariacionCrearModal = ({ visible, onClose, variacionId, pro
         await handleSubmit()
     }
 
+    const theme = useTheme()
+
     return (
         <Portal>
-            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
+            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={[styles.modalContainer, { backgroundColor: theme.colors.background }]}>
                 <Text variant="titleMedium" style={{ marginBottom: 10 }}>Agregar Atributo a Variación</Text>
 
                 <Dropdown
@@ -86,7 +88,6 @@ export const AtributoVariacionCrearModal = ({ visible, onClose, variacionId, pro
 
 const styles = StyleSheet.create({
     modalContainer: {
-        backgroundColor: 'white',
         padding: 20,
         margin: 20,
         borderRadius: 10,

@@ -12,7 +12,6 @@ import { useTiposAtributosConValores } from '../hooks/useCaracteristicas'
 import { AtributoCrearModal } from './Atributos/AtributosCrearModal'
 import { AtributoEditarModal } from './Atributos/AtributosEditarModal'
 import { AtributoEliminarModal } from './Atributos/AtributosEliminarModal'
-import { TipoAtributoCrearModal } from './TipoAtributos/TipoAtributosCrearModal'
 import { TipoAtributoEditarModal } from './TipoAtributos/TipoAtributosEditModal'
 import { TipoAtributoEliminarModal } from './TipoAtributos/TipoAtributosEliminarModal'
 
@@ -43,7 +42,6 @@ export default function TiposAtributosListScreen() {
     const [tipoAtributoIndividual, setTipoAtributoIndividual] = useState<AttributeType | null>(null)
 
     // Modal para Tipo de atributos
-    const [openTipoAttrModalCrear, setTipoAttrOpenModalCrear] = useState(false)
     const [openTipoAttrModalEliminar, setTipoAttrOpenModalEliminar] = useState(false)
     const [openTipoAttrModalEditar, setTipoAttrOpenModalEditar] = useState(false)
     const handleTipoAttrEliminar = (tipoAtributo: AttributeTypesWithAttributes) => {
@@ -82,8 +80,6 @@ export default function TiposAtributosListScreen() {
 
     return (
         <>
-            <Button mode='contained' onPress={() => setTipoAttrOpenModalCrear(true)}>Crear Tipo de Atributo</Button>
-            <TipoAtributoCrearModal onClose={() => setTipoAttrOpenModalCrear(false)} visible={openTipoAttrModalCrear}></TipoAtributoCrearModal>
 
             {tipoAtributoIndividual && openTipoAttrModalEliminar && (
                 <>
@@ -116,6 +112,7 @@ export default function TiposAtributosListScreen() {
             
 
             <FlatList
+            style={{ marginVertical: 10}}
                 data={tiposAcumulados}
                 keyExtractor={(item) => item.id.toString()}
                 refreshControl={<RefreshControl refreshing={cargando} onRefresh={handleRefresh} />}

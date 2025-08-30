@@ -1,8 +1,9 @@
 import { Order } from '@/src/shared/interfaces/OrderModel'
 import { VariationWithRelations } from '@/src/shared/interfaces/VariationModel'
+import { Image } from 'expo-image'
 import React, { useEffect } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { Button, Card, HelperText, TextInput } from 'react-native-paper'
+import { Button, Card, Chip, HelperText, TextInput } from 'react-native-paper'
 import { useDetalleOrdenCrearForm } from '../hooks/useForms'
 import { TipoModificador } from '../schemas/OrdenDetalleSchema'
 
@@ -17,6 +18,8 @@ export default function TarjetaVariacionOrden(
         handlerQuitarDePedido,
         modificarCantidad,
         modificarPrecio,
+        nombreProducto,
+        imagenProducto
     }:
         {
             orderId: number,
@@ -26,6 +29,8 @@ export default function TarjetaVariacionOrden(
             modificarCantidad: (variacionId: number, nuevaCantidad: number) => void
             modificarPrecio: (variacionId: number, nuevoPrecio: number) => void
             handlerQuitarDePedido: (variacionId: number) => void
+            nombreProducto: string
+            imagenProducto: string
         }) {
 
     const { errors, enProceso, handleSubmit, handleChange, values, touched } = useDetalleOrdenCrearForm(orderId, variacion, tipoOrden)
@@ -68,42 +73,83 @@ export default function TarjetaVariacionOrden(
 
 
     return (
+
+
         <Card key={orderId} style={styles.card}>
-            <Button mode='outlined' onPress={() => handlerQuitarDePedido(variacion.id)} >Quitar</Button>
+            <Card.Title
+                title={`Variación N° ${variacion.id}`}
 
-            <Card.Content>
-                {/* Cantidad */}
-                <View style={styles.row}>
-                    <Text style={styles.label}>Cantidad:</Text>
-                    <Button mode="outlined" onPress={() => sumarRestarCantidad("disminuir")} compact>-</Button>
-                    <TextInput
-                        value={values.cantidad.toString()}
-                        onChangeText={modificarCantidadHandler}
-                        keyboardType="numeric"
-                        style={styles.input}
-                    />
-                    <Button mode="outlined" onPress={() => sumarRestarCantidad("aumentar")} compact>+</Button>
-
-                    <HelperText type="error" visible={!!errors.cantidad && touched.cantidad}>
-                        {errors.cantidad}
-                    </HelperText>
+                right={(props) => (
+                    <Button
+                        mode="contained"
+                        onPress={() => handlerQuitarDePedido(variacion.id)}
+                        compact
+                        style={styles.quitarBtn}
+                    >
+                        Quitar
+                    </Button>
+                )}
+            />
+            <Card.Content style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <View style={styles.atributosContainer}>
+                    {variacion.variaciones_atributos.map((varAttr, index) => (
+                        <Chip
+                            key={index}
+                            compact
+                        >
+                            {varAttr.atributos?.tipos_atributos.nombre}: {varAttr.atributos?.valor}
+                        </Chip>
+                    ))}
                 </View>
+                {/* Imagen + Atributos */}
+                <View style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 8 }}>
+                    <View style={styles.topRow}>
+                        <Image
+                            source={{ uri: imagenProducto }}
+                            style={styles.productImage}
+                        />
+                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{nombreProducto}</Text>
+                    </View>
 
-                {/* Precio */}
-                <View style={styles.row}>
-                    <Text style={styles.label}>Precio (S/):</Text>
-                    <Button mode="outlined" onPress={() => sumarRestarPrecio("disminuir")} compact>-</Button>
-                    <TextInput
-                        value={values.precio_rebajado.toString()}
-                        onChangeText={modificarPrecioHandler}
-                        keyboardType="numeric"
-                        style={styles.input}
-                    />
-                    <Button mode="outlined" onPress={() => sumarRestarPrecio("aumentar")} compact>+</Button>
+                    <View style={{ display: 'flex', flexDirection: 'row'}}>
+                        {/* Cantidad */}
+                        <View style={styles.row}>
+                            <Text style={styles.label}>Cantidad:</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                <Button mode='contained-tonal' onPress={() => sumarRestarCantidad("disminuir")} compact>-</Button>
+                                <TextInput
+                                    value={values.cantidad.toString()}
+                                    onChangeText={modificarCantidadHandler}
+                                    keyboardType="numeric"
+                                    style={styles.input}
+                                    mode="outlined"
+                                />
+                                <Button mode='contained-tonal' onPress={() => sumarRestarCantidad("aumentar")} compact>+</Button>
+                            </View>
+                        </View>
+                        <HelperText type="error" visible={!!errors.cantidad && touched.cantidad}>
+                            {errors.cantidad}
+                        </HelperText>
 
-                    <HelperText type="error" visible={!!errors.precio_rebajado && touched.precio_rebajado}>
-                        {errors.precio_rebajado}
-                    </HelperText>
+                        {/* Precio */}
+                        <View style={styles.row}>
+                            <Text style={styles.label}>Precio (S/):</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                <Button mode='contained-tonal' onPress={() => sumarRestarPrecio("disminuir")} compact>-</Button>
+                                <TextInput
+                                    value={values.precio_rebajado.toString()}
+                                    onChangeText={modificarPrecioHandler}
+                                    keyboardType="numeric"
+                                    style={styles.input}
+                                    mode="outlined"
+                                />
+                                <Button mode='contained-tonal' onPress={() => sumarRestarPrecio("aumentar")} compact>+</Button>
+                            </View>
+                        </View>
+                        <HelperText type="error" visible={!!errors.precio_rebajado && touched.precio_rebajado}>
+                            {errors.precio_rebajado}
+                        </HelperText>
+                    </View>
                 </View>
             </Card.Content>
         </Card>
@@ -112,35 +158,44 @@ export default function TarjetaVariacionOrden(
 
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     card: {
-        margin: 8,
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: 10,
     },
-    row: {
+    quitarBtn: {
+        marginTop: 4,
+    },
+    topRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 6,
+    },
+    productImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 8,
+        marginRight: 12,
+    },
+    atributosContainer: {
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+        gap: 6,
+        fontSize: 12
+    },
+    chip: {
+        marginRight: 6,
+        marginBottom: 6,
+    },
+    row: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 8
     },
     label: {
         width: 80,
         fontWeight: 'bold',
     },
     input: {
-        flex: 1,
-        marginHorizontal: 8,
-        backgroundColor: 'white',
+        width: 60
     },
-    footer: {
-        padding: 12,
-        backgroundColor: '#f2f2f2',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    totalText: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginVertical: 4,
-    },
-})
+});

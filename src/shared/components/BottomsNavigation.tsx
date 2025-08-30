@@ -1,39 +1,78 @@
-import HomeScreen from '@/app/(tabs)';
-import CreateTab from '@/app/productos/create';
-import * as React from 'react';
-import { BottomNavigation, Text } from 'react-native-paper';
+import { CommonActions } from "@react-navigation/core";
+import { Tabs } from "expo-router";
+import { PropsWithChildren } from "react";
+import { BottomNavigation, BottomNavigationProps } from "react-native-paper";
 
-const MusicRoute = () => <HomeScreen></HomeScreen>;
+export type MaterialBottomTabsProps = PropsWithChildren<
+  Omit<
+    BottomNavigationProps<any>,
+    | "navigationState"
+    | "safeAreaInsets"
+    | "onTabPress"
+    | "renderIcon"
+    | "getLabelText"
+    | "onIndexChange"
+    | "renderScene"
+  >
+>;
 
-const AlbumsRoute = () => <CreateTab></CreateTab>;
-
-const RecentsRoute = () => <Text>Recents</Text>;
-
-const NotificationsRoute = () => <Text>Notifications</Text>;
-
-const CustomBottomNavigation = () => {
-  const [index, setIndex] = React.useState(0);
-  const [routes] = React.useState([
-    { key: 'music', title: 'Favorites', focusedIcon: 'heart', unfocusedIcon: 'heart-outline'},
-    { key: 'albums', title: 'Albums', focusedIcon: 'album' },
-    { key: 'recents', title: 'Recents', focusedIcon: 'history' },
-    { key: 'notifications', title: 'Notifications', focusedIcon: 'bell', unfocusedIcon: 'bell-outline' },
-  ]);
-
-  const renderScene = BottomNavigation.SceneMap({
-    music: MusicRoute,
-    albums: AlbumsRoute,
-    recents: RecentsRoute,
-    notifications: NotificationsRoute,
-  });
-
+export function MaterialBottomTabs({
+  children,
+  ...props
+}: MaterialBottomTabsProps) {
   return (
-    <BottomNavigation
-      navigationState={{ index, routes }}
-      onIndexChange={setIndex}
-      renderScene={renderScene}
-    />
-  );
-};
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+      }}
+      tabBar={({ navigation, state, descriptors, insets }) => (
+        <BottomNavigation.Bar
+          {...props}
+          navigationState={state}
+          safeAreaInsets={insets}
+          onTabPress={({ route, preventDefault }) => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
 
-export default CustomBottomNavigation;
+            if (event.defaultPrevented) {
+              preventDefault();
+            } else {
+              navigation.dispatch({
+                ...CommonActions.navigate(route.name, route.params),
+                target: state.key,
+              });
+            }
+          }}
+          renderIcon={({ route, focused, color }) => {
+            const { options } = descriptors[route.key];
+            if (options.tabBarIcon) {
+              return options.tabBarIcon({ focused, color, size: 24 });
+            }
+
+            return null;
+          }}
+          getLabelText={({ route }) => {
+            const { options } = descriptors[route.key];
+            const label =
+              options.tabBarLabel !== undefined
+                ? options.tabBarLabel
+                : options.title !== undefined
+                  ? options.title
+                  : "title" in route
+                    ? route.title
+                    : route.name;
+
+            return String(label);
+          }}
+        />
+      )}
+    >
+      {children}
+    </Tabs>
+  );
+}
+
+MaterialBottomTabs.Screen = Tabs.Screen;

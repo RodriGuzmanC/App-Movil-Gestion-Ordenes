@@ -5,9 +5,8 @@ import { Category } from '@/src/shared/interfaces/CategoryModel'
 import { PaginatedResponse } from '@/src/shared/interfaces/extras/ApiResponses'
 import { useEffect, useState } from 'react'
 import { FlatList, StyleSheet } from 'react-native'
-import { Button, Card, Text } from 'react-native-paper'
+import { Button, Card } from 'react-native-paper'
 import { useCategorias } from '../hooks/useCategorias'
-import { CategoriaCrearModal } from './CategoriaCrearModal'
 import { CategoriaEditarModal } from './CategoriaEditarModal'
 import { CategoriaEliminarModal } from './CategoriaEliminarModal'
 
@@ -34,7 +33,6 @@ export const CategoriaListar = () => {
     const [categoriaIndividual, setCategoriaIndividual] = useState<Category | null>(null)
     const [openEliminarModal, setOpenEliminarModal] = useState(false)
     const [openEditarModal, setOpenEditarModal] = useState(false)
-    const [openCrearModal, setOpenCrearModal] = useState(false)
 
     const handleEliminar = (categoryObj: Category) => {
         setCategoriaIndividual(categoryObj)
@@ -52,10 +50,6 @@ export const CategoriaListar = () => {
 
     return (
         <>
-            {openCrearModal && (
-                <CategoriaCrearModal visible={openCrearModal} onClose={() => setOpenCrearModal(false)}></CategoriaCrearModal>
-
-            )}
 
             {categoriaIndividual && openEliminarModal && (
                 <CategoriaEliminarModal
@@ -75,27 +69,37 @@ export const CategoriaListar = () => {
                 />
             )}
 
-            <Button
-                mode="contained"
-                onPress={() => setOpenCrearModal(true)}
-                style={{ margin: 16 }}>Crear categoria</Button>
             <FlatList
                 data={categoriasAcumuladas}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.listContainer}
                 renderItem={({ item }) => (
                     <Card style={styles.card} mode="elevated">
-                        <Card.Content>
-                            <Text variant="titleMedium">
-                                {item.nombre}
-                            </Text>
-                            <Text variant="bodyMedium" numberOfLines={2}>
-                                {item.descripcion || 'Sin descripción'}
-                            </Text>
-                        </Card.Content>
+                        <Card.Title
+                            title={item.nombre}
+                            titleVariant="titleLarge"
+                            subtitle={item.descripcion || 'Sin descripción'}
+                            subtitleNumberOfLines={2}
+                            titleStyle={styles.cardTitle}
+                        />
                         <Card.Actions style={styles.actions}>
-                            <Button mode="text" onPress={() => handleEditar(item)}>Editar</Button>
-                            <Button mode="text" textColor="red" onPress={() => handleEliminar(item)}>Eliminar</Button>
+                            <Button
+                                mode="outlined"
+                                icon="pencil"
+                                onPress={() => handleEditar(item)}
+                                style={styles.actionButton}
+                            >
+                                Editar
+                            </Button>
+                            <Button
+                                mode="outlined"
+                                icon="delete"
+                                textColor="red"
+                                onPress={() => handleEliminar(item)}
+                                style={styles.actionButton}
+                            >
+                                Eliminar
+                            </Button>
                         </Card.Actions>
                     </Card>
                 )}
@@ -114,22 +118,34 @@ export const CategoriaListar = () => {
 }
 
 export const styles = StyleSheet.create({
+    createButton: {
+        margin: 16,
+        borderRadius: 12,
+        paddingVertical: 6,
+    },
     listContainer: {
         padding: 16,
     },
     card: {
         marginBottom: 16,
-        borderRadius: 12,
-        elevation: 2,
+        borderRadius: 16,
+        elevation: 3,
     },
-
+    cardTitle: {
+        fontWeight: 'bold',
+    },
     actions: {
         justifyContent: 'flex-end',
         paddingRight: 12,
-        paddingBottom: 8,
+        paddingBottom: 12,
+    },
+    actionButton: {
+        marginLeft: 8,
+        borderRadius: 8,
     },
     footer: {
         padding: 16,
         alignItems: 'center',
     },
-})
+
+});

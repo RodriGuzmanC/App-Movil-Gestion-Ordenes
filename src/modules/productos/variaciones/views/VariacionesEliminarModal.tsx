@@ -1,6 +1,6 @@
 import { Variation } from '@/src/shared/interfaces/VariationModel'
 import { StyleSheet, View } from 'react-native'
-import { ActivityIndicator, Button, Modal, Portal, Text } from 'react-native-paper'
+import { ActivityIndicator, Button, Modal, Portal, Text, useTheme } from 'react-native-paper'
 import { useVariacionEliminarForm } from '../hooks/useForms'
 
 interface VariacionEliminarModalProps {
@@ -19,9 +19,11 @@ export const VariacionEliminarModal = ({ visible, onClose, idProducto, idVariaci
     onClose()
   }
 
+  const theme = useTheme()
+
   return (
-    <Portal>
-      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modal}>
+    <Portal theme={theme}>
+      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.background}]} >
         <Text variant="titleMedium" style={styles.title}>
           ¿Estás seguro que deseas eliminar esta variación?
         </Text>
@@ -53,7 +55,6 @@ export const VariacionEliminarModal = ({ visible, onClose, idProducto, idVariaci
 
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: 'white',
     padding: 20,
     marginHorizontal: 20,
     borderRadius: 8,

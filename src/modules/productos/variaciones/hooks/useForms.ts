@@ -56,9 +56,9 @@ export const useVariacionEditarForm = (variacionId: number, productoId: number, 
 
     const formik = useFormik<VariacionFormData>({
         initialValues: {
-            precio_unitario: 0,
-            precio_mayorista: 0,
-            stock: 0,
+            precio_unitario: '' as unknown as number,
+            precio_mayorista: '' as unknown as number,
+            stock: '' as unknown as number,
         },
         enableReinitialize: true,
         validationSchema: variacionSchema,

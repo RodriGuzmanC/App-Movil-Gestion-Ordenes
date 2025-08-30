@@ -2,7 +2,7 @@ import { useTiposAtributosConValores } from '@/src/modules/caracteristicas/hooks
 import { VariationAttributeWithRelations } from '@/src/shared/interfaces/VariationAttributeModel'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { ActivityIndicator, Button, HelperText, Modal, Portal, Text } from 'react-native-paper'
+import { ActivityIndicator, Button, HelperText, Modal, Portal, Text, useTheme } from 'react-native-paper'
 import { Dropdown } from 'react-native-paper-dropdown'
 import { useAtributoVariacionEditarForm } from '../hooks/useForms'
 
@@ -52,9 +52,12 @@ export const AtributoVariacionEditarModal = ({
         onClose()
     }
 
+        const theme = useTheme()
+    
+
     return (
         <Portal>
-            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modal}>
+            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.background }]}>
                 <Text variant="titleMedium" style={styles.title}>Editar Atributo de Variación</Text>
 
                 {cargando ? (
@@ -121,7 +124,6 @@ export const AtributoVariacionEditarModal = ({
 
 const styles = StyleSheet.create({
     modal: {
-        backgroundColor: 'white',
         padding: 20,
         marginHorizontal: 20,
         borderRadius: 8,

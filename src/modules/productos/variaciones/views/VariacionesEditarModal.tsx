@@ -1,7 +1,7 @@
 import { VariationWithRelations } from '@/src/shared/interfaces/VariationModel'
 import { useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { ActivityIndicator, Button, HelperText, Modal, Portal, Text, TextInput } from 'react-native-paper'
+import { ActivityIndicator, Button, HelperText, Modal, Portal, Text, TextInput, useTheme } from 'react-native-paper'
 import { ListaAtributosVariacion } from '../atributos/views/VarAtributoListar'
 import { useVariacionEditarForm } from '../hooks/useForms'
 
@@ -29,13 +29,15 @@ export const VariacionEditarModal = ({ visible, onClose, idProducto, idVariacion
         onClose()
     }
 
+    const theme = useTheme()
+
     const [openModalListar, setOpenModalListar] = useState(false)
 
     return (
         <Portal>
-            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modal}>
+            <Modal visible={visible} onDismiss={onClose} contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.background }]}>
                 <Text variant="titleMedium" style={styles.title}>
-                    Editar Variación
+                    Editar Variación N° {variacionObj.id}
                 </Text>
 
                 {openModalListar && (
@@ -111,7 +113,6 @@ export const VariacionEditarModal = ({ visible, onClose, idProducto, idVariacion
 
 const styles = StyleSheet.create({
     modal: {
-        backgroundColor: 'white',
         padding: 20,
         marginHorizontal: 20,
         borderRadius: 8,
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     input: {
-        marginBottom: 8,
+        marginBottom: 2,
     },
     actions: {
         flexDirection: 'row',
